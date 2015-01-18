@@ -1,0 +1,75 @@
+<script type="text/javascript">
+// MOSTLY COPIED FROM HISTOGRAM CODE:
+// http://stackoverflow.com/questions/20184194/d3-histogram-with-negative-values
+
+            var data = thelist;
+			var bar_width = 500,
+				bar_height = 300,
+				padding = 50;
+
+			var histogram = d3.layout.histogram()
+				.bins(10)
+				(data);
+
+
+			var someArray =[];
+			for (var i=0; i < histogram.length; i++){
+				someArray.push(histogram[i].length);
+			}
+			var maxVal = d3.max(someArray);
+
+			var y = d3.scale.linear()
+				.domain([0, maxVal])
+				.range([0,bar_height]);
+
+			var x = d3.scale.linear()
+				.domain([d3.min(data),d3.max(data)])
+				.range([0,bar_width]);
+
+			var xAxis = d3.svg.axis()
+				.scale(x)
+				.orient('bottom');
+
+			var canvas = d3.select('div#chart').append('svg')
+				.attr('width',bar_width)
+				.attr('height',bar_height + padding);
+                //.style('opacity', 0.7);
+
+            var background = canvas.append('rect')
+				.attr('width',bar_width)
+				.attr('height',bar_height + padding)
+                .attr('fill', 'white')
+                .attr('opacity', 0.7)
+                .attr('stroke', 'black');
+
+			var xAxisPrinter = canvas.append('g').classed('axis', true)
+				.attr('transform','translate(0,'+bar_height+')')
+				.call(xAxis);
+
+			var bars = canvas.selectAll('.bar')
+				.data(histogram)
+				.enter()
+				.append('g');
+
+			bars.append("rect")
+				.attr('x', function(d){return x(d.x);})
+				.attr('y', function(d){return bar_height - y(d.y);})
+				.attr('width', function(d){return bar_width/histogram.length; })
+				.attr('height', function(d){return y(d.y);})
+                .attr("stroke", "black")
+				.attr("fill","#d6681f");
+
+			bars.append('text')
+				.attr('x', function(d){return x(d.x); })
+				.attr('y', function(d){return bar_height - y(d.y);})
+				.attr('dx', function(d){return bar_width/(histogram.length*2);})
+				.attr('dy', "20px")
+				.style('text-anchor','middle')
+				.text(function(d){
+					if (d.y != 0){
+						return d.y;
+					}
+					else {
+						return null;
+					}});
+</script>

@@ -1,0 +1,159 @@
+<script type="text/javascript">
+    var frame_length = 20;
+    var offset = 300;
+    var width = document.getElementById("main").clientWidth - frame_length * 2;
+    var height = document.getElementById("menu").clientHeight - frame_length * 2 - offset;
+
+    var svg = d3.selectAll("div#main").append("svg")
+    .attr("x", frame_length)
+    .attr("y", frame_length)
+    .attr("width", width)
+    .attr("height", height)
+    .append("g")
+    .call(d3.behavior.zoom().scaleExtent([1,5]).on("zoom", zoomHandler))
+    .append("g");
+
+    var data_all = [d3.tsv("realdata/0.csv"),d3.tsv("realdata/1.csv"),
+        d3.tsv("realdata/2.csv"),d3.tsv("realdata/3.csv"),d3.tsv("realdata/4.csv"),
+        d3.tsv("realdata/5.csv"),d3.tsv("realdata/6.csv"),d3.tsv("realdata/7.csv"),
+        d3.tsv("realdata/8.csv"),d3.tsv("realdata/9.csv"),d3.tsv("realdata/10.csv"),
+        d3.tsv("realdata/11.csv"),d3.tsv("realdata/12.csv"),d3.tsv("realdata/13.csv"),
+        d3.tsv("realdata/14.csv"),d3.tsv("realdata/15.csv"),d3.tsv("realdata/16.csv"),
+        d3.tsv("realdata/17.csv"),d3.tsv("realdata/18.csv"),d3.tsv("realdata/19.csv"),
+        d3.tsv("realdata/20.csv"),d3.tsv("realdata/21.csv"),d3.tsv("realdata/22.csv"),
+        d3.tsv("realdata/23.csv"),d3.tsv("realdata/24.csv"),d3.tsv("realdata/25.csv"),
+        d3.tsv("realdata/26.csv"),d3.tsv("realdata/27.csv"),d3.tsv("realdata/28.csv"),
+        d3.tsv("realdata/29.csv"),d3.tsv("realdata/30.csv"),d3.tsv("realdata/31.csv"),
+        d3.tsv("realdata/32.csv"),d3.tsv("realdata/33.csv"),d3.tsv("realdata/34.csv"),
+        d3.tsv("realdata/35.csv"),d3.tsv("realdata/36.csv"),d3.tsv("realdata/37.csv"),
+        d3.tsv("realdata/38.csv"),d3.tsv("realdata/39.csv"),d3.tsv("realdata/40.csv"),
+        d3.tsv("realdata/41.csv"),d3.tsv("realdata/42.csv"),d3.tsv("realdata/43.csv"),
+        d3.tsv("realdata/44.csv"),d3.tsv("realdata/45.csv"),d3.tsv("realdata/46.csv"),
+        d3.tsv("realdata/47.csv")];
+
+    var zoomable = false;
+    function zoomHandler() {
+        if (zoomable) {
+            svg.attr("transform",
+                    "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        }
+    }
+    svg.append("rect")
+        .attr("class", "overlay")
+        .attr("width", width)
+        .attr("height", height);
+	d3.select('#mousenav').on('click',function () {
+	    if (zoomable == false) {
+            zoomable = true;
+        } else {
+            zoomable = false;
+        }
+    });
+
+    function update(data_new, r, idx1, idx2) {
+		var ft;
+        data_new.get(function(error, dd){
+			ft = dd;
+            dd.forEach( function(d, i) {
+                d.i = +i;
+                d.id = +d.id;     d.age = +d.age;   d.country = d.country;
+                d.pd1 = +d.pd1;   d.pd2 = +d.pd2;   d.pd3 = +d.pd3;
+                d.ps1 = +d.ps1;   d.ps2 = +d.ps2;   d.ps3 = +d.ps3;
+                d.sl1 = +d.sl1;   d.sl2 = +d.sl2;   d.sl3 = +d.sl3;
+                d.r1 = +d.r1;     d.r2 = +d.r2;     d.r3 = +d.r3;
+                d.t1 = +d.t1;     d.t2 = +d.t2;     d.t3 = +d.t3;     d.t4 = +d.t4;
+                d.um1 = +d.um1;   d.um2 = +d.um2;   d.um3 = +d.um3;
+                d.um4 = +d.um4;   d.um5 = +d.um5;   d.um6 = +d.um6;
+            });
+
+            var circle = svg.selectAll(".dot")
+                .data(dd);
+
+            var xScale = d3.scale.linear()
+                .domain([d3.min(dd, function(d){return d[idx1];}),
+                        d3.max(dd, function(d){return d[idx1];})])
+                .range([r, width - r]);
+            var yScale = d3.scale.linear()
+                .domain([d3.min(dd, function(d){return d[idx2];}),
+                        d3.max(dd, function(d){return d[idx2];})])
+                .range([height - r, r]);
+
+            circle.enter()
+                .append("circle")
+                .classed("dot", true)
+                .attr("r", 0);
+
+            circle
+                .transition()
+                .attr("r", r)
+                .attr("cx", function(d) {return xScale(d[idx1]);})
+                .attr("cy", function(d) {return yScale(d[idx2]);})
+                .duration(1500);
+
+            circle.exit()
+                .transition()
+                .attr("r", 0)
+                .duration(1000)
+                .remove();
+
+            circle.on("click", function(d) {
+                    if (d3.select(this).classed("selected") === true) {
+                    d3.select(this)
+                    .classed("selected", false)
+                    .attr("stroke", "#1f8dd6");
+                    } else {
+                    d3.select(this)
+                    .classed("selected", true)
+                    .attr("stroke", "#d6681f");
+                    }
+                    });
+            
+            // selection
+            var brush = svg.append("g")
+				.attr("class", "brush")
+				.call(d3.svg.brush()
+				.x(d3.scale.identity().domain([0, width]))
+				.y(d3.scale.identity().domain([0, height]))
+				.on("brush", function() {
+				    if (zoomable == false) {
+					    var extent = d3.event.target.extent();	
+						circle.classed("selected", function(d) {
+					return extent[0][0] <= xScale(d[idx1]) && xScale(d[idx1]) < extent[1][0]
+					    && extent[0][1] <= yScale(d[idx2]) && yScale(d[idx2]) < extent[1][1];
+					});
+                    var listing = [];
+					var active = d3.selectAll("circle").filter(".selected");
+                    var indices = active.each(function (d) { listing.push(d.i); } );
+					mySelection = active.data();
+                    var thisFeature = document.getElementsByName("feat3")[0].value;
+                    var anotherVarLOL = [];
+                    listing.forEach(function (d) {
+                        anotherVarLOL.push(d3.map(ft).values()[d][thisFeature])
+                    });
+                    saveToTheList(anotherVarLOL);
+                    //console.log(anotherVarLOL);
+			    }}));
+
+            document.getElementsByTagName("rect")[0]
+                .addEventListener('contextmenu',
+                        function(evt) {
+                        console.log("yayaya");
+                        evt.preventDefault();
+                        },
+                        false);
+        });
+    }
+
+    function updateRadius(r) {
+        var circle = svg.selectAll(".dot")
+            .transition()
+            .attr("r", r)
+            .duration(500);
+    }
+
+    update(data_all[0], 5, 'placeholder1', 'placeholder2');
+</script>
+        <p align="center">Data from Jan 2011 to Dec 2014</p>
+        <input type="range" id="idxData" min="0" max="47" value="0" onchange="update(data_all[this.value], radius.value, 'placeholder1', 'placeholder2')">
+        <p align="center">Circle Size</p>
+        <input type="range" id="radius" min="0" max="20" step="0.1" value="5" oninput="updateRadius(this.value)">
