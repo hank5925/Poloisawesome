@@ -1,9 +1,6 @@
 README
 Cian O'Brien, Raja Raman, Ying-Shu Kuo
 
-* Check the slides for more intuitive introduction.
-  http://www.slideshare.net/yingshukuo/visualizing-similarity-between-music-fans-from-listening-history
-
 * Data Collection
     - Use Eclipse to run the code in /Lastfmfilter.
     - Point the workspace to /Path/To/Poloisawesome.

@@ -13,25 +13,7 @@
     .call(d3.behavior.zoom().scaleExtent([1,5]).on("zoom", zoomHandler))
     .append("g");
 
-    var data_all = [d3.tsv("realdata/0_out.csv"),d3.tsv("realdata/1_out.csv"),
-        d3.tsv("realdata/2_out.csv"),d3.tsv("realdata/3_out.csv"),d3.tsv("realdata/4_out.csv"),
-        d3.tsv("realdata/5_out.csv"),d3.tsv("realdata/6_out.csv"),d3.tsv("realdata/7_out.csv"),
-        d3.tsv("realdata/8_out.csv"),d3.tsv("realdata/9_out.csv"),d3.tsv("realdata/10_out.csv"),
-        d3.tsv("realdata/11_out.csv"),d3.tsv("realdata/12_out.csv"),d3.tsv("realdata/13_out.csv"),
-        d3.tsv("realdata/14_out.csv"),d3.tsv("realdata/15_out.csv"),d3.tsv("realdata/16_out.csv"),
-        d3.tsv("realdata/17_out.csv"),d3.tsv("realdata/18_out.csv"),d3.tsv("realdata/19_out.csv"),
-        d3.tsv("realdata/20_out.csv"),d3.tsv("realdata/21_out.csv"),d3.tsv("realdata/22_out.csv"),
-        d3.tsv("realdata/23_out.csv"),d3.tsv("realdata/24_out.csv"),d3.tsv("realdata/25_out.csv"),
-        d3.tsv("realdata/26_out.csv"),d3.tsv("realdata/27_out.csv"),d3.tsv("realdata/28_out.csv"),
-        d3.tsv("realdata/29_out.csv"),d3.tsv("realdata/30_out.csv"),d3.tsv("realdata/31_out.csv"),
-        d3.tsv("realdata/32_out.csv"),d3.tsv("realdata/33_out.csv"),d3.tsv("realdata/34_out.csv"),
-        d3.tsv("realdata/35_out.csv"),d3.tsv("realdata/36_out.csv"),d3.tsv("realdata/37_out.csv"),
-        d3.tsv("realdata/38_out.csv"),d3.tsv("realdata/39_out.csv"),d3.tsv("realdata/40_out.csv"),
-        d3.tsv("realdata/41_out.csv"),d3.tsv("realdata/42_out.csv"),d3.tsv("realdata/43_out.csv"),
-        d3.tsv("realdata/44_out.csv"),d3.tsv("realdata/45_out.csv"),d3.tsv("realdata/46_out.csv"),
-        d3.tsv("realdata/47_out.csv")];
-
-    var data_oll = [d3.tsv("realdata/0.csv"),d3.tsv("realdata/1.csv"),
+    var data_all = [d3.tsv("realdata/0.csv"),d3.tsv("realdata/1.csv"),
         d3.tsv("realdata/2.csv"),d3.tsv("realdata/3.csv"),d3.tsv("realdata/4.csv"),
         d3.tsv("realdata/5.csv"),d3.tsv("realdata/6.csv"),d3.tsv("realdata/7.csv"),
         d3.tsv("realdata/8.csv"),d3.tsv("realdata/9.csv"),d3.tsv("realdata/10.csv"),
@@ -68,28 +50,32 @@
         }
     });
 
-    function update(data_new, r, data_old) {
+    function update(data_new, r, idx1, idx2) {
 		var ft;
-        data_old.get(function(error, dd){
-			ft = dd;
-        });
         data_new.get(function(error, dd){
+			ft = dd;
             dd.forEach( function(d, i) {
                 d.i = +i;
-                d.f1 = +d.f1;
-                d.f2 = +d.f2;
+                d.id = +d.id;     d.age = +d.age;   d.country = d.country;
+                d.pd1 = +d.pd1;   d.pd2 = +d.pd2;   d.pd3 = +d.pd3;
+                d.ps1 = +d.ps1;   d.ps2 = +d.ps2;   d.ps3 = +d.ps3;
+                d.sl1 = +d.sl1;   d.sl2 = +d.sl2;   d.sl3 = +d.sl3;
+                d.r1 = +d.r1;     d.r2 = +d.r2;     d.r3 = +d.r3;
+                d.t1 = +d.t1;     d.t2 = +d.t2;     d.t3 = +d.t3;     d.t4 = +d.t4;
+                d.um1 = +d.um1;   d.um2 = +d.um2;   d.um3 = +d.um3;
+                d.um4 = +d.um4;   d.um5 = +d.um5;   d.um6 = +d.um6;
             });
 
             var circle = svg.selectAll(".dot")
                 .data(dd);
 
             var xScale = d3.scale.linear()
-                .domain([d3.min(dd, function(d){return d.f1;}),
-                        d3.max(dd, function(d){return d.f1;})])
+                .domain([d3.min(dd, function(d){return d[idx1];}),
+                        d3.max(dd, function(d){return d[idx1];})])
                 .range([r, width - r]);
             var yScale = d3.scale.linear()
-                .domain([d3.min(dd, function(d){return d.f2;}),
-                        d3.max(dd, function(d){return d.f2;})])
+                .domain([d3.min(dd, function(d){return d[idx2];}),
+                        d3.max(dd, function(d){return d[idx2];})])
                 .range([height - r, r]);
 
             circle.enter()
@@ -100,8 +86,8 @@
             circle
                 .transition()
                 .attr("r", r)
-                .attr("cx", function(d) {return xScale(d.f1);})
-                .attr("cy", function(d) {return yScale(d.f2);})
+                .attr("cx", function(d) {return xScale(d[idx1]);})
+                .attr("cy", function(d) {return yScale(d[idx2]);})
                 .duration(1500);
 
             circle.exit()
@@ -121,7 +107,7 @@
                     .attr("stroke", "#d6681f");
                     }
                     });
-
+            
             // selection
             var brush = svg.append("g")
 				.attr("class", "brush")
@@ -132,8 +118,8 @@
 				    if (zoomable == false) {
 					    var extent = d3.event.target.extent();	
 						circle.classed("selected", function(d) {
-					return extent[0][0] <= xScale(d.f1) && xScale(d.f1) < extent[1][0]
-					    && extent[0][1] <= yScale(d.f2) && yScale(d.f2) < extent[1][1];
+					return extent[0][0] <= xScale(d[idx1]) && xScale(d[idx1]) < extent[1][0]
+					    && extent[0][1] <= yScale(d[idx2]) && yScale(d[idx2]) < extent[1][1];
 					});
                     var listing = [];
 					var active = d3.selectAll("circle").filter(".selected");
@@ -145,6 +131,7 @@
                         anotherVarLOL.push(d3.map(ft).values()[d][thisFeature])
                     });
                     saveToTheList(anotherVarLOL);
+                    //console.log(anotherVarLOL);
 			    }}));
 
             document.getElementsByTagName("rect")[0]
@@ -164,9 +151,9 @@
             .duration(500);
     }
 
-    update(data_all[0], 5, data_oll[0]);
+    update(data_all[0], 5, 'age', 'pd2');
 </script>
         <p align="center">Data from Jan 2011 to Dec 2014</p>
-        <input type="range" id="idxData" min="0" max="47" value="0" onchange="update(data_all[this.value], radius.value, data_oll[this.value])">
+        <input type="range" id="idxData" min="0" max="47" value="0" onchange="update(data_all[this.value], radius.value, 'age', 'pd2')">
         <p align="center">Circle Size</p>
         <input type="range" id="radius" min="0" max="20" step="0.1" value="5" oninput="updateRadius(this.value)">
